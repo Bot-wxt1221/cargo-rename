@@ -48,7 +48,9 @@ std::string gethash(char *pre,std::string tt){
   FILE* fd=fopen("hashout","r");
   fscanf(fd,"%s",::buffer);
   fclose(fd);
-  system("rm -rf temp");
+  temp = "rm -rf temp ";
+  temp+=pre+tt;
+  system(temp.c_str());
   return std::string(::buffer);
 }
 int main(int argc,char *argv[]){
