@@ -9,6 +9,7 @@
 #include <sys/stat.h>
 #include <stdio.h>
 #include <fcntl.h>
+#include <filesystem>
 #include <sys/mman.h>
 struct stat buf;
 std::string str;
@@ -53,11 +54,21 @@ std::string gethash(char *pre,std::string tt){
   system(temp.c_str());
   return std::string(::buffer);
 }
+std::string getfilefolder(std::string a){
+  while(a[a.size()-1]!='/'){
+    a.pop_back();
+  }
+  a.pop_back();
+  return a;
+}
 int main(int argc,char *argv[]){
+  std::string file_folder;
   std::string ans1,ans2;
   bool yes=0;
   int fd=open(argv[1],O_RDWR);
-  stat(argv[1],&buf);
+  fstat(fd,&buf);
+  file_folder=getfilefolder(std::string(argv[1]));
+  exit(0);
   char *ori=(char *)mmap(NULL,buf.st_size,PROT_READ|PROT_WRITE,MAP_SHARED,fd,0);
   char *ttt=ori;
   char *temp=(char *)malloc(buf.st_size+100);
@@ -128,7 +139,7 @@ int main(int argc,char *argv[]){
   }
   munmap(ttt,buf.st_size);
   close(fd);
-  FILE *a=fopen(argv[3],"w");
+  FILE *a=fopen(argv[1],"w");
   ans=ans1+gethash(argv[2],find_lockfile(str))+ans2;
   fprintf(a,"%s",ans.c_str());
   fclose(a);
