@@ -6,15 +6,15 @@
 
 int main(){
   std::filebuf buf;
-  buf.open("filewithcargoLock",std::ios::in);
+  buf.open("../filewithcargoLock",std::ios::in);
   std::istream is(&buf);
   std::filebuf buf4;
-  buf4.open("packagename",std::ios::in);
+  buf4.open("../packagename",std::ios::in);
   std::istream is2(&buf4);
   std::filebuf buf2,buf3;
-  buf2.open("error",std::ios::ate|std::ios::out);
+  buf2.open("../error",std::ios::ate|std::ios::out);
   std::ostream err(&buf2);
-  buf3.open("com",std::ios::ate|std::ios::out);
+  buf3.open("../com",std::ios::ate|std::ios::out);
   std::ostream out(&buf3);
   std::string ans;
   while(is>>ans){
@@ -28,7 +28,7 @@ int main(){
       return -1;
     }else{
       out<<ans<<std::endl;
-      path="git add "+path;
+      path="git add .";
       system(path.c_str());
       std::string tt2;
       is2>>tt2;

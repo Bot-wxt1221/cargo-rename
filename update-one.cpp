@@ -51,27 +51,28 @@ void copyback(char *path){
 }
 char buffer[10005];
 std::string gethash(std::string pre,std::string tt,char *path){
-  std::cerr<<pre;
   std::string temp="fetch-cargo-vendor-util create-vendor-staging ";
   temp+=pre;
   temp+='/';
   temp+=tt;
-  temp+=" temp";
+  temp+=" ../temp";
   std::cerr<<temp;
-  int ret=system(temp.c_str());
+  //int ret=system(temp.c_str());
+  int ret=0;
   if(ret!=0){
     copyback(path);
-    system("rm -rf temp");
+    system("rm -rf ../temp");
     std::cerr<<"error when calcing hash!";
     exit(-1);
   }
-  temp="nix-hash --sri --type sha256 temp/ > hashout";
+  temp="nix-hash --sri --type sha256 ../temp/ > hashout";
   system(temp.c_str());
   FILE* fd=fopen("hashout","r");
   fscanf(fd,"%s",::buffer);
   fclose(fd);
-  temp = "rm -rf temp ";
-  temp+=pre+tt;
+  temp = "rm -rf ../temp ";
+  temp+=pre+'/'+tt;
+  std::cerr<<temp;
   system(temp.c_str());
   return std::string(::buffer);
 }
@@ -166,7 +167,7 @@ int main(int argc,char *argv[]){
   if(ans3==""){
     copyback(argv[1]);
     std::cerr<<"error when find lockFile";
-    system("rm -rf temp");
+    system("rm -rf ../temp");
     exit(-1);
   }
   ans=ans1+gethash(file_folder,ans3,argv[1])+ans2;
