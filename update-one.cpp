@@ -57,8 +57,7 @@ std::string gethash(std::string pre,std::string tt,char *path){
   temp+=tt;
   temp+=" ../temp";
   std::cerr<<temp;
-  //int ret=system(temp.c_str());
-  int ret=0;
+  int ret=system(temp.c_str());
   if(ret!=0){
     copyback(path);
     system("rm -rf ../temp");
