@@ -25,7 +25,7 @@ std::string find_lockfile(std::string tt){
       }
       i++;
       while(tt[i]!=';'){
-        if(isprint(tt[i])){
+        if(isprint(tt[i])&&tt[i]!=' '){
           ans+=tt[i];
         }
         i++;
@@ -50,16 +50,20 @@ void copyback(char *path){
   system(ans.c_str());
 }
 char buffer[10005];
-std::string gethash(char *pre,std::string tt,char *path){
+std::string gethash(std::string pre,std::string tt,char *path){
+  std::cerr<<pre;
   std::string temp="fetch-cargo-vendor-util create-vendor-staging ";
   temp+=pre;
   temp+='/';
   temp+=tt;
   temp+=" temp";
+  std::cerr<<temp;
   int ret=system(temp.c_str());
   if(ret!=0){
     copyback(path);
+    system("rm -rf temp");
     std::cerr<<"error when calcing hash!";
+    exit(-1);
   }
   temp="nix-hash --sri --type sha256 temp/ > hashout";
   system(temp.c_str());
@@ -87,7 +91,6 @@ int main(int argc,char *argv[]){
   fdd=fd;
   fstat(fd,&buf);
   file_folder=getfilefolder(std::string(argv[1]));
-  exit(0);
   char *ori=(char *)mmap(NULL,buf.st_size,PROT_READ|PROT_WRITE,MAP_SHARED,fd,0);
   char *ttt=ori;
   char *temp=(char *)malloc(buf.st_size+100);
@@ -159,15 +162,25 @@ int main(int argc,char *argv[]){
   munmap(ttt,buf.st_size);
   close(fd);
   FILE *a=fopen(argv[1],"w");
-  ans=ans1+gethash(argv[2],find_lockfile(str),argv[1])+ans2;
+  std::string ans3=find_lockfile(str);
+  if(ans3==""){
+    copyback(argv[1]);
+    std::cerr<<"error when find lockFile";
+    system("rm -rf temp");
+    exit(-1);
+  }
+  ans=ans1+gethash(file_folder,ans3,argv[1])+ans2;
   fprintf(a,"%s",ans.c_str());
   fclose(a);
   std::string tt="nixfmt ";
-  tt+=argv[3];
+  tt+=argv[1];
   int ret=system(tt.c_str());
   if(ret!=0){
     copyback(argv[1]);
     std::cerr<<"error when nixfmt";
+    system("rm -rf temp");
+    exit(-1);
   }
   free(begg);
+  return 0;
 }
