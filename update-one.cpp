@@ -40,12 +40,12 @@ int fdd;
 void backup(char *path){
   std::string ans="cp ";
   ans+=path;
-  ans+=" backup";
+  ans+=" ../backup";
   system(ans.c_str());
 }
 void copyback(char *path){
   close(fdd);
-  std::string ans="cp backup ";
+  std::string ans="cp ../backup ";
   ans+=path;
   system(ans.c_str());
 }
@@ -64,9 +64,9 @@ std::string gethash(std::string pre,std::string tt,char *path){
     std::cerr<<"error when calcing hash!";
     exit(-1);
   }
-  temp="nix-hash --sri --type sha256 ../temp/ > hashout";
+  temp="nix-hash --sri --type sha256 ../temp/ > ../hashout";
   system(temp.c_str());
-  FILE* fd=fopen("hashout","r");
+  FILE* fd=fopen("../hashout","r");
   fscanf(fd,"%s",::buffer);
   fclose(fd);
   temp = "rm -rf ../temp ";
