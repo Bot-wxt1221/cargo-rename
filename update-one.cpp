@@ -25,7 +25,7 @@ std::string find_lockfile(std::string tt){
       }
       i++;
       while(tt[i]!=';'){
-        if(tt[i]!=' '){
+        if(isprint(tt[i])){
           ans+=tt[i];
         }
         i++;
@@ -36,14 +36,31 @@ std::string find_lockfile(std::string tt){
   }
   return ans;
 }
+int fdd;
+void backup(char *path){
+  std::string ans="cp ";
+  ans+=path;
+  ans+=" backup";
+  system(ans.c_str());
+}
+void copyback(char *path){
+  close(fdd);
+  std::string ans="cp backup ";
+  ans+=path;
+  system(ans.c_str());
+}
 char buffer[10005];
-std::string gethash(char *pre,std::string tt){
+std::string gethash(char *pre,std::string tt,char *path){
   std::string temp="fetch-cargo-vendor-util create-vendor-staging ";
   temp+=pre;
   temp+='/';
   temp+=tt;
   temp+=" temp";
-  system(temp.c_str());
+  int ret=system(temp.c_str());
+  if(ret!=0){
+    copyback(path);
+    std::cerr<<"error when calcing hash!";
+  }
   temp="nix-hash --sri --type sha256 temp/ > hashout";
   system(temp.c_str());
   FILE* fd=fopen("hashout","r");
@@ -64,8 +81,10 @@ std::string getfilefolder(std::string a){
 int main(int argc,char *argv[]){
   std::string file_folder;
   std::string ans1,ans2;
+  backup(argv[1]);
   bool yes=0;
   int fd=open(argv[1],O_RDWR);
+  fdd=fd;
   fstat(fd,&buf);
   file_folder=getfilefolder(std::string(argv[1]));
   exit(0);
@@ -140,11 +159,15 @@ int main(int argc,char *argv[]){
   munmap(ttt,buf.st_size);
   close(fd);
   FILE *a=fopen(argv[1],"w");
-  ans=ans1+gethash(argv[2],find_lockfile(str))+ans2;
+  ans=ans1+gethash(argv[2],find_lockfile(str),argv[1])+ans2;
   fprintf(a,"%s",ans.c_str());
   fclose(a);
   std::string tt="nixfmt ";
   tt+=argv[3];
-  system(tt.c_str());
+  int ret=system(tt.c_str());
+  if(ret!=0){
+    copyback(argv[1]);
+    std::cerr<<"error when nixfmt";
+  }
   free(begg);
 }
